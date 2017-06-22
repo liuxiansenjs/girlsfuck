@@ -209,6 +209,7 @@
 		}
 		self._start = function() {
 			self.score += 1;
+			self.render();
 			self._timeCounter = setInterval(function() {
 				self.render();
 				self.score += 1;
