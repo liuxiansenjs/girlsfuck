@@ -201,7 +201,7 @@
 	}, 100);
 	function score(dom_element) {
 		var self = {};
-		self.scoreArray = localStorage.getItem('score_r').split(",");
+		self.scoreArray = localStorage.getItem('score_r') ? localStorage.getItem('score_r').split(",") : [];
 		self.dom_element = dom_element;
 		self.score = 0;
 		self.render = function() {
