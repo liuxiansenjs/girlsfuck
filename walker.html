@@ -1,0 +1,230 @@
+<style>
+	*, *::before, *::after {
+		padding: 0;
+		margin: 0;
+		box-sizing: border-box;
+	}
+
+	body {
+		background: pink;
+	}
+
+	
+</style>
+<div class="score"></div>
+<div class="randreamer"></div>
+<div class="sjb"></div>
+<div class="randreamer"></div>
+<div class="randreamer"></div>
+<div class="randreamer"></div>
+<div class="randreamer"></div>
+
+<script>
+	function Waler(dom_element) {
+		dom_element.style.width = '36px';
+		dom_element.style.height = '81px';
+		dom_element.style.position = 'absolute';
+		dom_element.style.top = Math.random() * document.documentElement.clientHeight / 2 - 40.5 + 'px';
+		dom_element.style.left = Math.random() * document.documentElement.clientWidth / 2 - 18 + 'px';
+		dom_element.style.background = 'url("aisidier.png") no-repeat -23px -22px';
+		this.dom_element = dom_element;
+		this._lock = false;
+		this._idx = 0;
+	}
+
+	Waler.prototype.move = function(direct, v) {
+		direct = direct ? direct : 'D'; v = v ? v : 10;
+		var now_position = {
+			left: parseInt(window.getComputedStyle(this.dom_element).left, 10),
+			top: parseInt(window.getComputedStyle(this.dom_element).top, 10),
+		}
+
+		
+		this.walk();
+		if (direct === 'S') {
+			this.dom_element.style.top = now_position.top + v + 'px';
+			this.dom_element.style.backgroundPositionY = '-22px';
+		}
+		if (direct === 'W') {
+			this.dom_element.style.top = now_position.top - v + 'px';
+			this.dom_element.style.backgroundPositionY = '-344px';
+		}
+		if (direct === 'A') {
+			this.dom_element.style.left = now_position.left - v + 'px';
+			this.dom_element.style.backgroundPositionY = '-127px';
+		}
+		if (direct === 'D') {
+			this.dom_element.style.left = now_position.left + v + 'px';
+			this.dom_element.style.backgroundPositionY = '-236px';
+		}
+
+		if (now_position.left < 10) {
+			this.dom_element.style.left = 10 + 'px';
+		}
+		if (now_position.left > document.documentElement.clientWidth - 46) {
+			this.dom_element.style.left = document.documentElement.clientWidth - 46 + 'px';
+		}
+		if (now_position.top < 10) {
+			this.dom_element.style.top = 10 + 'px';
+		}
+
+		if (now_position.top > document.documentElement.clientHeight - 91) {
+			this.dom_element.style.top = document.documentElement.clientHeight - 91 + 'px';
+		}
+	}
+
+	Waler.prototype.walk = function() {
+		if (this._lock) return;
+		this._lock = true;
+		this._idx = ++this._idx > 7 ? 0 : this._idx;
+		this.dom_element.style.backgroundPositionX = (- 23 - this._idx * 79) + 'px';
+		var self = this;
+		setTimeout(function() {
+			self._lock = false;
+		}, 20);
+	}
+
+	Waler.prototype.getCurrentPosition = function() {
+		return {
+			left: parseInt(window.getComputedStyle(this.dom_element).left, 10),
+			top: parseInt(window.getComputedStyle(this.dom_element).top, 10),
+		}
+	}
+
+
+	function Sjb(dom_element) {
+		Waler.call(this, dom_element);
+		this.dom_element.style.top = document.documentElement.clientHeight / 2 - 40.5 + 'px';
+		this.dom_element.style.left = document.documentElement.clientWidth / 2 - 18 + 'px';
+		this.bindEvent();
+	}
+
+	Sjb.prototype = Object.create(Waler.prototype);
+	Sjb.prototype.bindEvent = function () {
+		var self = this;
+		document.onkeydown = function(e) {
+			if (e.key === 'w') {
+				self.move('W', 15);
+			}
+			if (e.key === 'd') {
+				self.move('D', 15);
+			}
+			if (e.key === 's') {
+				self.move('S', 15);
+			}
+			if (e.key === 'a') {
+				self.move('A', 15);
+			}
+		}
+	}
+
+	function Randreamer (dom_element) {
+		Waler.call(this, dom_element);
+		this.foo();
+	}
+
+	Randreamer.prototype = Object.create(Waler.prototype);
+	Randreamer.prototype.move = function(direct) {
+		var self = this;
+		var speed = self.speed();
+		Waler.prototype.move.call(self, direct, speed);
+	}
+	Randreamer.prototype.chooseDirection = function() {
+		var Random = Math.floor(Math.random() * 4);
+		if (Random === 0) return 'W';
+		if (Random === 1) return 'A';
+		if (Random === 2) return 'S';
+		if (Random === 3) return 'D';
+	}
+	Randreamer.prototype.speed = function() {
+		return Math.round(Math.random() * (5 - 2)) + 2;
+	}
+	Randreamer.prototype.foo = function() {
+		var self = this;
+		self.loop_g = setInterval(function() {
+			clearInterval(self.loop_w);
+			var direct = self.chooseDirection();
+			self.loop_w = setInterval(function() {
+				self.move(direct);
+			}, 20);
+			
+		}, 200);
+	};
+
+	function ping (DOM_Obj1, DOM_Obj2) {
+		[DOM_Obj1, DOM_Obj2].forEach(function(item) {
+			item.getCurrentPosition = function() {
+				return {
+					left: parseInt(window.getComputedStyle(item).left, 10),
+					top: parseInt(window.getComputedStyle(item).top, 10),
+					width: parseInt(window.getComputedStyle(item).width, 10),
+					height: parseInt(window.getComputedStyle(item).height, 10),
+				}
+			}
+		});
+		if (DOM_Obj2.getCurrentPosition().left + DOM_Obj2.getCurrentPosition().height > DOM_Obj1.getCurrentPosition().left && DOM_Obj2.getCurrentPosition().left < DOM_Obj1.getCurrentPosition().left + DOM_Obj1.getCurrentPosition().width && DOM_Obj2.getCurrentPosition().top + DOM_Obj2.getCurrentPosition().height > DOM_Obj1.getCurrentPosition().top && DOM_Obj2.getCurrentPosition().top < DOM_Obj1.getCurrentPosition().top) {
+			console.log('true');
+			return true;
+		}
+		console.log('false');
+		return false;
+	}
+
+
+
+	var sjb = new Sjb(document.querySelector('.sjb'));
+	var arr = [];
+	[].slice.call(document.querySelectorAll('.randreamer')).forEach(function(item, index, array) {
+		arr.push(new Randreamer(item));
+	});
+
+	var timeInterval = setInterval(function() {
+		arr.forEach(function(item) {
+			var v = ping(sjb.dom_element, item.dom_element);
+			if (v) {
+				clearInterval(timeInterval);
+				scoreCounter.finish();
+				arr.forEach(function(item) {
+					clearInterval(item.loop_w);
+					clearInterval(item.loop_g);
+					var ele = document.createElement('div');
+					ele.style.position = 'fixed';
+					ele.style.top = '0px';
+					ele.style.left = '0px';
+					ele.style.width = '100%';
+					ele.style.height = '100%';
+					ele.style.background = 'rgba(0,0,0,0.3)';
+					document.body.appendChild(ele);
+				});
+			}
+		});
+	}, 100);
+	function score(dom_element) {
+		var self = {};
+		self.scoreArray = localStorage.getItem('score_r').split(",");
+		self.dom_element = dom_element;
+		self.score = 0;
+		self.render = function() {
+			self.dom_element.innerHTML = '得分: ' + self.score;
+		}
+		self._start = function() {
+			self.score += 1;
+			self._timeCounter = setInterval(function() {
+				self.render();
+				self.score += 1;
+			}, 1000);
+		}
+		self._start();
+		
+		self.finish = function() {
+			clearInterval(self._timeCounter);
+			self.scoreArray.push(self.score);
+			localStorage.setItem('score_r', self.scoreArray);
+			alert('GAME OVER');
+			alert('最高分是'+ Math.max.apply(null, self.scoreArray));
+		}
+		return self;
+	}
+
+	var scoreCounter = score(document.querySelector('.score'));
+</script>
